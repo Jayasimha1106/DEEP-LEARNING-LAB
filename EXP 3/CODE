@@ -1,0 +1,87 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    confusion_matrix,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report
+)
+
+# Load Digits Dataset
+X, y = load_digits(return_X_y=True)
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.25,
+    random_state=23
+)
+
+# Create Random Forest Model
+clf = RandomForestClassifier(random_state=23)
+
+# Train Model
+clf.fit(X_train, y_train)
+
+# Predict
+y_pred = clf.predict(X_test)
+
+# Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Plot Heatmap
+plt.figure(figsize=(10, 8))
+
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt='d',
+    cmap='winter'
+)
+
+plt.ylabel('Actual Label', fontsize=13)
+plt.xlabel('Predicted Label', fontsize=13)
+plt.title('Confusion Matrix', fontsize=17)
+
+plt.show()
+
+# Accuracy
+accuracy = accuracy_score(y_test, y_pred)
+
+# Precision
+precision = precision_score(
+    y_test,
+    y_pred,
+    average='weighted'
+)
+
+# Recall
+recall = recall_score(
+    y_test,
+    y_pred,
+    average='weighted'
+)
+
+# F1 Score
+f1 = f1_score(
+    y_test,
+    y_pred,
+    average='weighted'
+)
+
+# Print Results
+print("Accuracy :", round(accuracy, 4))
+print("Precision:", round(precision, 4))
+print("Recall   :", round(recall, 4))
+print("F1 Score :", round(f1, 4))
+
+# Classification Report
+print("\nClassification Report:\n")
+print(classification_report(y_test, y_pred))
