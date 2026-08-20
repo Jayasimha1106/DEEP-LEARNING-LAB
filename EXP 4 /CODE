@@ -1,0 +1,101 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import cross_val_score
+
+# True function
+def true_fun(X):
+    return np.cos(1.5 * np.pi * X)
+
+# Random seed
+np.random.seed(0)
+
+# Number of samples
+n_samples = 30
+
+# Polynomial degrees
+degrees = [1, 4, 15]
+
+# Generate dataset
+X = np.sort(np.random.rand(n_samples))
+y = true_fun(X) + np.random.randn(n_samples) * 0.1
+
+# Create figure
+plt.figure(figsize=(14, 5))
+
+# Train models with different polynomial degrees
+for i in range(len(degrees)):
+
+    ax = plt.subplot(1, len(degrees), i + 1)
+    plt.setp(ax, xticks=(), yticks=())
+
+    # Polynomial Regression Pipeline
+    pipeline = Pipeline([
+        ("polynomial_features",
+         PolynomialFeatures(degree=degrees[i], include_bias=False)),
+        ("linear_regression",
+         LinearRegression())
+    ])
+
+    # Train model
+    pipeline.fit(X[:, np.newaxis], y)
+
+    # Cross-validation score
+    scores = cross_val_score(
+        pipeline,
+        X[:, np.newaxis],
+        y,
+        scoring="neg_mean_squared_error",
+        cv=10
+    )
+
+    # Test data
+    X_test = np.linspace(0, 1, 100)
+
+    # Plot predictions
+    plt.plot(
+        X_test,
+        pipeline.predict(X_test[:, np.newaxis]),
+        label="Model"
+    )
+
+    # Plot true function
+    plt.plot(
+        X_test,
+        true_fun(X_test),
+        label="True Function"
+    )
+
+    # Plot samples
+    plt.scatter(
+        X,
+        y,
+        color="red",
+        marker="^",
+        s=40,
+        label="Samples"
+    )
+
+    # Labels
+    plt.xlabel("X")
+    plt.ylabel("Y")
+
+    plt.xlim((0, 1))
+    plt.ylim((-2, 2))
+
+    plt.legend(loc="best")
+
+    plt.title(
+        "Degree {}\nMSE = {:.2e} (+/- {:.2e})".format(
+            degrees[i],
+            -scores.mean(),
+            scores.std()
+        )
+    )
+
+# Show graph
+plt.tight_layout()
+plt.show()
