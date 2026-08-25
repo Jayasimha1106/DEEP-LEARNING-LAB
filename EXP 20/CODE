@@ -1,0 +1,139 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, log_loss
+
+# -----------------------------------
+# 1. Create XOR dataset
+# -----------------------------------
+
+X = np.array([
+    [-1, -1],
+    [-1,  1],
+    [ 1, -1],
+    [ 1,  1]
+])
+
+y = np.array([0, 1, 1, 0])
+
+# Add more samples around the XOR points
+np.random.seed(42)
+
+X_data = []
+y_data = []
+
+for i in range(100):
+    x1 = np.random.uniform(-5, 5)
+    x2 = np.random.uniform(-5, 5)
+
+    # XOR classification
+    if (x1 < 0 and x2 < 0) or (x1 > 0 and x2 > 0):
+        label = 0
+    else:
+        label = 1
+
+    X_data.append([x1, x2])
+    y_data.append(label)
+
+X_data = np.array(X_data)
+y_data = np.array(y_data)
+
+# -----------------------------------
+# 2. Split dataset
+# -----------------------------------
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_data,
+    y_data,
+    test_size=0.50,
+    random_state=42
+)
+
+# -----------------------------------
+# 3. Create Neural Network
+# -----------------------------------
+# Learning rate = 0.01
+# Activation = Linear (identity)
+# Hidden layers = 2
+# Hidden neurons = 2, 2
+
+model = MLPClassifier(
+    hidden_layer_sizes=(2, 2),
+    activation='identity',
+    solver='sgd',
+    learning_rate_init=0.01,
+    max_iter=1000,
+    random_state=42
+)
+
+# -----------------------------------
+# 4. Train the model
+# -----------------------------------
+
+model.fit(X_train, y_train)
+
+# -----------------------------------
+# 5. Prediction
+# -----------------------------------
+
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)
+
+# -----------------------------------
+# 6. Accuracy and Loss
+# -----------------------------------
+
+accuracy = accuracy_score(y_test, y_pred)
+loss = log_loss(y_test, y_prob)
+
+print("Experiment 20")
+print("----------------------------")
+print("Learning Rate :", 0.01)
+print("Activation    : Linear")
+print("Hidden Layers : 2")
+print("Hidden Neurons: 2, 2")
+print("----------------------------")
+print("Test Accuracy :", accuracy)
+print("Test Loss     :", loss)
+
+# -----------------------------------
+# 7. Plot decision boundary
+# -----------------------------------
+
+x_min, x_max = X_data[:, 0].min() - 1, X_data[:, 0].max() + 1
+y_min, y_max = X_data[:, 1].min() - 1, X_data[:, 1].max() + 1
+
+xx, yy = np.meshgrid(
+    np.linspace(x_min, x_max, 300),
+    np.linspace(y_min, y_max, 300)
+)
+
+grid = np.c_[xx.ravel(), yy.ravel()]
+
+Z = model.predict(grid)
+Z = Z.reshape(xx.shape)
+
+plt.figure(figsize=(8, 6))
+
+plt.contourf(
+    xx,
+    yy,
+    Z,
+    alpha=0.3
+)
+
+plt.scatter(
+    X_test[:, 0],
+    X_test[:, 1],
+    c=y_test,
+    edgecolors='black',
+    s=50
+)
+
+plt.xlabel("X1")
+plt.ylabel("X2")
+plt.title("Experiment 20 - Neural Network Classification")
+
+plt.grid(True)
+plt.show()
