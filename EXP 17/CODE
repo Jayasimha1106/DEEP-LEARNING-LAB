@@ -1,0 +1,71 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# Create dataset
+X, y = make_classification(
+    n_samples=100,
+    n_features=2,
+    n_informative=2,
+    n_redundant=0,
+    n_clusters_per_class=1,
+    random_state=42
+)
+
+# Create Logistic Regression model
+model = LogisticRegression()
+
+# Train the model
+model.fit(X, y)
+
+# Predict
+y_pred = model.predict(X)
+
+# Calculate accuracy
+accuracy = accuracy_score(y, y_pred)
+
+print(f"Accuracy: {accuracy:.2f}")
+
+# Plot the data
+plt.figure(figsize=(10, 6))
+
+plt.scatter(
+    X[:, 0],
+    X[:, 1],
+    c=y,
+    cmap="viridis",
+    edgecolor="black",
+    s=50
+)
+
+# Get model coefficients
+coef = model.coef_[0]
+intercept = model.intercept_[0]
+
+# Create values for decision boundary
+x_vals = np.linspace(
+    X[:, 0].min(),
+    X[:, 0].max(),
+    100
+)
+
+# Calculate decision boundary
+y_vals = -(coef[0] * x_vals + intercept) / coef[1]
+
+# Plot decision boundary
+plt.plot(
+    x_vals,
+    y_vals,
+    "k--",
+    label="Decision Boundary"
+)
+
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.title("Linear Separability Demonstration")
+plt.legend()
+plt.grid(True)
+plt.show()
